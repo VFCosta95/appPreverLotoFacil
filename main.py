@@ -32,7 +32,7 @@ colunas_para_excluir = [
 tabela = tabela.drop(columns=colunas_para_excluir)
 
 # Considerar apenas os 100 últimos dados
-tabela = tabela.tail(5)
+tabela = tabela.tail(100)
 
 # Preparar os dados
 x = tabela.drop(columns=['Concurso'])  # Remover a coluna 'Concurso'
@@ -46,7 +46,7 @@ plt.xlabel('Concurso')
 plt.ylabel('Bolas')
 plt.title('Lotofacil')
 plt.legend()
-# plt.show()
+plt.show()
 
 # Criar e treinar um modelo de regressão linear para cada bola
 models = []
