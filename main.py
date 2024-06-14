@@ -1,25 +1,11 @@
+import numpy as np # Manipular os Arrays
+import matplotlib.pyplot as plt # Visualizar os dados
 import pandas as pd
-import matplotlib.pyplot as plt
-import sklearn as skl
-import numpy as np
+from sklearn.linear_model import LinearRegression # Para criar modelo de Regressão Linear
+from sklearn.metrics import mean_squared_error, r2_score # Avaliar o modelo
 
-# Projeto Machine Learning - Aprendizado de Máquina
-"""
-# Carregar todas as abas do arquivo Excel
-tabela = pd.ExcelFile('C:/Users/vinic/OneDrive/Área de Trabalho/Python/Lotofacil.xlsx')
-sheets = tabela.sheet_names
-
-
-# Criar uma lista vazia para armazenar os DataFrames
-dfs = []
-
-# Loop através de cada aba e carregar em um DataFrame
-for sheet in sheets:
-    df = pd.read_excel(tabela, sheet_name=sheet)
-    dfs.append(df)
-
-# Concatenar todos os DataFrames
-result = pd.concat(dfs, ignore_index=True)
+# Carregar os dados do arquivo Excel
+tabela = pd.read_excel('C:/Users/vinic/OneDrive/Área de Trabalho/Python/Loto_v8.xlsx', engine='openpyxl')
 
 # Excluir colunas específicas
 colunas_para_excluir = [
@@ -39,97 +25,54 @@ colunas_para_excluir = [
     'Cidade / UF',
     'Ganhadores 15 acertos',
     'Observação',
-    'Data Sorteio']  # Substitua pelos nomes das colunas que você deseja excluir
+    'Data Sorteio'
+]
 
-result = result.drop(columns=colunas_para_excluir)
+# Excluir as colunas da lista
+tabela = tabela.drop(columns=colunas_para_excluir)
 
-# Criar uma lista de resultados
-resultados = []
+# Considerar apenas os 100 últimos dados
+tabela = tabela.tail(5)
 
-# Iterar sobre cada linha do DataFrame
-for index, row in result.iterrows():
-    # Converter a linha em uma lista e adicionar à lista de resultados
-    resultado = list(row)
-    resultados.append(resultado)
+# Preparar os dados
+x = tabela.drop(columns=['Concurso'])  # Remover a coluna 'Concurso'
+y = tabela[['Bola1', 'Bola2', 'Bola3', 'Bola4', 'Bola5', 'Bola6', 'Bola7', 'Bola8', 'Bola9', 'Bola10', 'Bola11', 'Bola12', 'Bola13', 'Bola14', 'Bola15']]
 
-# Exibir o exemplo do resultado 1
-print("Resultado", resultados[1])
+# Visualizar os dados em um gráfico de dispersão
+plt.figure(figsize=(10, 6))
+for i in range(1, 16):
+    plt.scatter(x.index, y[f'Bola{i}'], label=f'Bola{i}', alpha=0.5)
+plt.xlabel('Concurso')
+plt.ylabel('Bolas')
+plt.title('Lotofacil')
+plt.legend()
+# plt.show()
 
-# Especificar o nome do arquivo de saída com as modificações
-nome_arquivo_saida = 'C:/Users/vinic/OneDrive/Área de Trabalho/Python/Lotofacil_modificado.xlsx'
+# Criar e treinar um modelo de regressão linear para cada bola
+models = []
+predictions = []
 
-# Salvar o DataFrame modificado em um novo arquivo Excel
-result.to_excel(nome_arquivo_saida, index=False)
+for i in range(15):
+    model_linear = LinearRegression()
+    model_linear.fit(np.arange(len(x)).reshape(-1, 1), y[f'Bola{i + 1}'])
+    models.append(model_linear)
 
-print("Arquivo salvo com sucesso!")"""
+    # Fazer previsão para o próximo número
+    x_new = np.array([len(x) + 1])
+    y_new = model_linear.predict(x_new.reshape(-1, 1))
+    predictions.append(y_new[0])
 
-# Carregando os dados da tabela
-tabela = pd.read_excel('C:/Users/vinic/OneDrive/Área de Trabalho/Python/Lotofacil_modificado.xlsx')
-# print(tabela.head(10)) # Mostrar as 10 primeiras
+# Mostrar as previsões para cada bola
+for i in range(15):
+    print(f'A bola {i+1} = {int(round(predictions[i]))}')
 
-resultados = []
+# Avaliar o desempenho dos modelos com algumas métricas (opcional)
+y_pred_linear = np.zeros_like(y.values)
+for i in range(15):
+    y_pred_linear[:, i] = models[i].predict(np.arange(len(x)).reshape(-1, 1))
 
-# Iterar sobre cada linha do DataFrame
-for index, row in tabela.iterrows():
-    # Converter a linha em uma lista e adicionar à lista de resultados
-    resultado = list(row)
-    resultados.append(resultado)
+mse = mean_squared_error(y, y_pred_linear)
+r2 = r2_score(y, y_pred_linear, multioutput='variance_weighted')
 
-# Exibir o exemplo do resultado 1
-print("Resultado:", resultados[1])
-
-
-# Tranformar o nome e o valor da coluna style de red para o n° 0
-tabela['Concurso'] = tabela['Concurso'].replace('red', 0)
-
-# Tranformar o nome e o valor da coluna Bola de b para o n° 1
-tabela['Bola1'] = tabela['Bola1'].replace('b1', 1)
-tabela['Bola2'] = tabela['Bola2'].replace('b2', 1)
-tabela['Bola3'] = tabela['Bola3'].replace('b3', 1)
-tabela['Bola4'] = tabela['Bola4'].replace('b4', 1)
-tabela['Bola5'] = tabela['Bola5'].replace('b5', 1)
-tabela['Bola6'] = tabela['Bola6'].replace('b6', 1)
-tabela['Bola7'] = tabela['Bola7'].replace('b7', 1)
-tabela['Bola8'] = tabela['Bola8'].replace('b8', 1)
-tabela['Bola9'] = tabela['Bola9'].replace('b9', 1)
-tabela['Bola10'] = tabela['Bola10'].replace('b10', 1)
-tabela['Bola11'] = tabela['Bola11'].replace('b11', 1)
-tabela['Bola12'] = tabela['Bola12'].replace('b12', 1)
-tabela['Bola13'] = tabela['Bola13'].replace('b13', 1)
-tabela['Bola14'] = tabela['Bola14'].replace('b14', 1)
-tabela['Bola15'] = tabela['Bola15'].replace('b15', 1)
-
-"""
-# Separar as Variaveis
-y = tabela['Bola1'] # Vai receber o valor da coluna style
-x = tabela.drop('Bola1', axis = 1) # Será todas as outras colunas menos a coluna style
-
-# Treinar e testar a maquina para saber o que é vinho red ou white
-
-from sklearn.model_selection import train_test_split
-# Exportando função da biblioteca sklearn
-
-# Treinar e testar as variaveis x e y. E testar 30% = test_size=0.3
-x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.3)
-#___________________________________________________________________________
-x_teste.shape # Testou 1950 Linhas e 12 Colunas
-y_teste.shape # Testou 1950 Linhas e 1 Colunas
-#___________________________________________________________________________
-
-# Árvore de Classificação
-from sklearn.ensemble import ExtraTreesClassifier
-# Criando modelo
-modelo = ExtraTreesClassifier()
-# Treinar o x, y
-modelo.fit(x_treino, y_treino)
-# Imprimindo o Resultado do Teste
-resultado = modelo.score(x_teste, y_teste)
-print("Probabilidade: ", resultado) # Probabilidade:  0.9948717948717949
-# A probabilidade da correção foi 99.48%
-print("__________________________________")
-#___________________________________________________________________________
-
-# Fazer a previsão do teste
-previsao = modelo.predict(x_teste[500:505])
-print(previsao)
-"""
+print(f'MSE: {mse}')
+print(f'R2: {r2}')
