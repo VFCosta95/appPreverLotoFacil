@@ -1,0 +1,1 @@
+Aplicativo inovador desenvolvido com Python e Machine Learning para fornecer previsões precisas e estratégias otimizadas para jogadores da Lotofácil. Utilizando algoritmos avançados de aprendizado de máquina e análise estatística.
